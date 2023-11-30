@@ -1,62 +1,38 @@
-
-import sklearn
 import numpy as np
 import pandas as pd
-from sklearn.metrics import accuracy_score
-from mglearn.datasets import load_extended_boston
-from sklearn.model_selection import train_test_split
-from sklearn.linear_model import LogisticRegression
 import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_squared_error
 
-# Read the CSV file into a DataFrame
+# Load the dataset
+# For example, assuming you have a CSV file named 'house_data.csv' with columns 'area' and 'price'
+# Replace 'house_data.csv' with your dataset file name
 data = pd.read_csv('D:\codecraft\house-prices.csv')
 
-data['Brick'].replace('Yes', 1, inplace=True)
-data['Brick'].replace('No', 0, inplace=True)
-
-data.drop(['Neighborhood'], axis=1, inplace=True)
-
-# Calculate the median of 'Price'
-median_price = data['Price'].median()
-
-# Calculate the percentage scale based on median price
-data['Percentage_Scale'] = data['Price'].apply(lambda x: (x / median_price) * 50)
-
-# Function to determine 'sold_status' based on the percentage scale
-def get_sold_status(percentage):
-    if percentage >= 50:
-        return 1
-    else:
-        return 0
-
-# Applying the function to create the 'sold_status' column
-data['sold_status'] = data['Percentage_Scale'].apply(get_sold_status)
-
-print(data)
-
-#all features excluding Sold
-concepts = np.array(data.iloc[:,0:-1])
-
-#only includes Sold
-target = np.array(data.iloc[:,-1])
+# Assuming 'area' as the feature and 'price' as the target variable
+X = data['SqFt'].values.reshape(-1, 1)  # Features
+y = data['Price'].values  # Target variable
 
 # Split the data into training and testing sets
-X_train, X_test, y_train, y_test = train_test_split(concepts, target, test_size=0.2, random_state=42)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-# Create and train the linear regression model
-model = LogisticRegression()
+# Create a Linear Regression model
+model = LinearRegression()
+
+# Fit the model with the training data
 model.fit(X_train, y_train)
 
-# Make predictions
+# Make predictions on the test set
 y_pred = model.predict(X_test)
 
-accuracy = accuracy_score(y_test, y_pred)
-print('Accuracy: ', accuracy)
-
-
-# Plotting actual vs predicted prices
-plt.scatter(y_test, y_pred, color='blue')
+# Plotting the graph of predictions between actual price & predicted price
+plt.scatter(y_test, y_pred)
 plt.xlabel('Actual Price')
 plt.ylabel('Predicted Price')
-plt.title('Actual vs Predicted House Prices')
+plt.title('Actual Price vs Predicted Price')
 plt.show()
+
+# Evaluating the model
+mse = mean_squared_error(y_test, y_pred)
+print(f"Mean Squared Error: {mse}")
